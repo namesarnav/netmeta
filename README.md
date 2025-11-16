@@ -5,7 +5,7 @@
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-Ready-326CE5?style=flat&logo=kubernetes)](https://kubernetes.io/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-**Network Intelligence and Auto-Remediation Platform** for Meta's backbone and data center teams.
+**Network Intelligence and Auto-Remediation Platform**
 
 `netmeta` is a production-grade Go application that monitors and manages **BGP, OSPF, and MPLS** in multi-vendor network environments. It provides real-time monitoring, topology visualization, and automated remediation capabilities.
 
