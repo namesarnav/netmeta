@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netmeta
+  labels:
+    app: netmeta
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: netmeta
+  template:
+    metadata:
+      labels:
+        app: netmeta
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: netmeta
+        image: netmeta:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/netmeta", "serve"]
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 9090
+          name: metrics
+          protocol: TCP
+        env:
+        - name: NETMETA_API_HOST
+          value: "0.0.0.0"
+        - name: NETMETA_API_PORT
+          value: "8080"
+        volumeMounts:
+        - name: config
+          mountPath: /etc/netmeta
+        - name: data
+          mountPath: /var/lib/netmeta
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/v1/bgp/peers
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/v1/bgp/peers
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+      volumes:
+      - name: config
+        configMap:
+          name: netmeta-config
+      - name: data
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: netmeta
+  labels:
+    app: netmeta
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  - port: 9090
+    targetPort: 8080
+    protocol: TCP
+    name: metrics
+  selector:
+    app: netmeta
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: netmeta-config
+data:
+  config.yaml: |
+    bgp:
+      peers:
+        - address: 10.0.0.1
+          asn: 65001
+          port: 179
+    ospf:
+      interface: eth0
+    mpls:
+      enabled: true
+    auto:
+      enabled: true
+      flap_threshold: 3
+      flap_window_sec: 300
+    api:
+      host: 0.0.0.0
+      port: 8080
+    db:
+      path: /var/lib/netmeta
+

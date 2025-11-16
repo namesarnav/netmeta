@@ -1,0 +1,28 @@
+bgp:
+  peers:
+    - address: 10.0.0.1
+      asn: 65001
+      port: 179
+    - address: 10.0.0.2
+      asn: 65002
+      port: 179
+
+ospf:
+  interface: eth0
+  pcap_file: capture.pcap
+
+mpls:
+  enabled: true
+
+auto:
+  enabled: true
+  flap_threshold: 3
+  flap_window_sec: 300
+
+api:
+  host: 0.0.0.0
+  port: 8080
+
+db:
+  path: /var/lib/netmeta
+
